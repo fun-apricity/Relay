@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaskFlow — Team Task Manager</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #222536;
+      --surface3: #2a2d40;
+      --border: #2e3148;
+      --primary: #6366f1;
+      --primary-hover: #4f52d3;
+      --primary-glow: rgba(99,102,241,0.15);
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --info: #3b82f6;
+      --text: #e2e8f0;
+      --text-muted: #8892a4;
+      --text-dim: #4a5568;
+      --radius: 10px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; }
+    input, textarea, select { font-family: inherit; }
+
+    /* ─── UTILITY ─── */
+    .hidden { display: none !important; }
+    .flex { display: flex; }
+    .flex-col { flex-direction: column; }
+    .items-center { align-items: center; }
+    .justify-between { justify-content: space-between; }
+    .gap-2 { gap: 8px; }
+    .gap-3 { gap: 12px; }
+    .gap-4 { gap: 16px; }
+    .mt-2 { margin-top: 8px; }
+    .mt-4 { margin-top: 16px; }
+    .w-full { width: 100%; }
+    .text-sm { font-size: 13px; }
+    .text-xs { font-size: 11px; }
+    .text-muted { color: var(--text-muted); }
+    .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+    /* ─── AUTH SCREEN ─── */
+    #auth-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(ellipse at 60% 20%, rgba(99,102,241,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 20% 80%, rgba(139,92,246,0.08) 0%, transparent 50%),
+                  var(--bg);
+    }
+    .auth-card {
+      width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow);
+    }
+    .auth-logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; margin-bottom: 8px; }
+    .auth-logo span { color: var(--primary); }
+    .auth-subtitle { color: var(--text-muted); font-size: 14px; margin-bottom: 32px; }
+    .auth-tabs { display: flex; background: var(--surface2); border-radius: 8px; padding: 4px; margin-bottom: 28px; }
+    .auth-tab {
+      flex: 1; padding: 8px; text-align: center; border-radius: 6px; font-size: 14px;
+      font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.2s; border: none; background: none;
+    }
+    .auth-tab.active { background: var(--primary); color: white; }
+
+    /* ─── FORM ELEMENTS ─── */
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 13px; font-weight: 500; color: var(--text-muted); margin-bottom: 6px; }
+    .form-input {
+      width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+    .form-input::placeholder { color: var(--text-dim); }
+    textarea.form-input { resize: vertical; min-height: 90px; }
+    .form-select {
+      width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14px; outline: none; appearance: none; cursor: pointer;
+    }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      padding: 10px 18px; border-radius: 8px; font-size: 14px; font-weight: 500;
+      border: none; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+    .btn-danger { background: rgba(239,68,68,0.12); color: var(--danger); border: 1px solid rgba(239,68,68,0.2); }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+    .btn-success { background: rgba(16,185,129,0.12); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-icon { padding: 8px; border-radius: 8px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-icon:hover { background: var(--surface3); color: var(--text); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* ─── ALERTS ─── */
+    .alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+    .alert-error { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3); color: #6ee7b7; }
+
+    /* ─── APP LAYOUT ─── */
+    #app-screen { display: flex; height: 100vh; overflow: hidden; }
+
+    /* ─── SIDEBAR ─── */
+    .sidebar {
+      width: 240px; background: var(--surface); border-right: 1px solid var(--border);
+      display: flex; flex-direction: column; padding: 20px 12px; flex-shrink: 0;
+    }
+    .sidebar-logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; padding: 8px 12px; margin-bottom: 24px; }
+    .sidebar-logo span { color: var(--primary); }
+    .sidebar-section-label {
+      font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+      color: var(--text-dim); padding: 0 12px; margin-bottom: 6px; margin-top: 16px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: var(--text-muted); cursor: pointer;
+      transition: all 0.15s; border: none; background: none; width: 100%; text-align: left;
+    }
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--primary-glow); color: var(--primary); }
+    .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+    .user-profile { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; color: white;
+    }
+    .avatar-lg { width: 40px; height: 40px; font-size: 16px; }
+    .user-info .user-name { font-size: 13px; font-weight: 600; }
+    .user-info .user-role { font-size: 11px; color: var(--text-muted); text-transform: capitalize; }
+
+    /* ─── MAIN CONTENT ─── */
+    .main { flex: 1; overflow-y: auto; padding: 32px; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
+    .page-title { font-size: 24px; font-weight: 700; letter-spacing: -0.5px; }
+    .page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
+
+    /* ─── STAT CARDS ─── */
+    .stat-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 20px; position: relative; overflow: hidden;
+    }
+    .stat-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: var(--accent-color, var(--primary));
+    }
+    .stat-label { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 10px; }
+    .stat-value { font-size: 36px; font-weight: 800; letter-spacing: -1px; }
+    .stat-icon { font-size: 28px; margin-bottom: 8px; }
+
+    /* ─── CARDS ─── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px;
+    }
+    .card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+
+    /* ─── BADGE ─── */
+    .badge {
+      display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-todo { background: rgba(148,163,184,0.12); color: #94a3b8; }
+    .badge-in_progress { background: rgba(59,130,246,0.12); color: #60a5fa; }
+    .badge-review { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .badge-done { background: rgba(16,185,129,0.12); color: #34d399; }
+    .badge-active { background: rgba(16,185,129,0.12); color: #34d399; }
+    .badge-completed { background: rgba(99,102,241,0.12); color: #a5b4fc; }
+    .badge-on_hold { background: rgba(245,158,11,0.12); color: #fbbf24; }
+    .priority-low { color: #94a3b8; }
+    .priority-medium { color: #60a5fa; }
+    .priority-high { color: #fbbf24; }
+    .priority-urgent { color: #f87171; }
+    .priority-dot {
+      width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px;
+    }
+    .dot-low { background: #94a3b8; }
+    .dot-medium { background: #60a5fa; }
+    .dot-high { background: #fbbf24; }
+    .dot-urgent { background: #f87171; }
+
+    /* ─── PROJECT CARD ─── */
+    .project-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 20px; cursor: pointer; transition: all 0.2s;
+    }
+    .project-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(99,102,241,0.15); }
+    .project-name { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+    .project-desc { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+    .project-meta { display: flex; gap: 16px; font-size: 12px; color: var(--text-muted); }
+    .project-progress { margin-top: 14px; }
+    .progress-bar { height: 4px; background: var(--surface3); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.4s; }
+    .progress-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ─── TASK ROW ─── */
+    .task-row {
+      display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+      border-bottom: 1px solid var(--border); transition: background 0.15s; cursor: pointer;
+    }
+    .task-row:last-child { border-bottom: none; }
+    .task-row:hover { background: var(--surface2); }
+    .task-check { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--border); flex-shrink: 0; cursor: pointer; }
+    .task-check.done { background: var(--success); border-color: var(--success); }
+    .task-title-cell { flex: 1; font-size: 14px; }
+    .task-title-cell.done { color: var(--text-muted); text-decoration: line-through; }
+    .task-due { font-size: 12px; color: var(--text-muted); }
+    .task-due.overdue { color: var(--danger); }
+
+    /* ─── TABLE ─── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 10px 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    td { padding: 12px 16px; font-size: 14px; border-bottom: 1px solid var(--border); }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--surface2); }
+
+    /* ─── MODAL ─── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex;
+      align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);
+    }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      padding: 28px; width: 480px; max-width: 95vw; max-height: 85vh; overflow-y: auto;
+      box-shadow: var(--shadow); position: relative;
+    }
+    .modal-lg { width: 620px; }
+    .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .modal-close {
+      position: absolute; top: 20px; right: 20px; background: var(--surface2);
+      border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px;
+      color: var(--text-muted); cursor: pointer; font-size: 16px;
+    }
+    .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+    /* ─── FILTERS ─── */
+    .filter-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .filter-btn.active { border-color: var(--primary); background: var(--primary-glow); color: var(--primary); }
+    .search-input {
+      padding: 8px 14px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 14px; outline: none; width: 240px;
+    }
+    .search-input:focus { border-color: var(--primary); }
+
+    /* ─── EMPTY STATE ─── */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-desc { font-size: 14px; }
+
+    /* ─── LOADING ─── */
+    .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-center { display: flex; align-items: center; justify-content: center; padding: 60px; }
+
+    /* ─── TASK DETAIL ─── */
+    .task-detail-header { margin-bottom: 20px; }
+    .comment-item { padding: 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 8px; }
+    .comment-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 768px) {
+      .sidebar { width: 60px; padding: 16px 8px; }
+      .sidebar-logo, .nav-text, .sidebar-section-label, .user-info { display: none; }
+      .nav-item { justify-content: center; padding: 10px; }
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .main { padding: 20px; }
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  AUTH SCREEN                                           -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">Task<span>Flow</span></div>
+    <div class="auth-subtitle">Manage your team, track your work.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Create Account</button>
+    </div>
+
+    <div id="auth-alert"></div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form">
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" id="login-email" class="form-input" placeholder="you@company.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="login-password" class="form-input" placeholder="••••••••" />
+      </div>
+      <button class="btn btn-primary w-full" style="justify-content:center;margin-top:8px" onclick="handleLogin()">
+        Sign In
+      </button>
+    </div>
+
+    <!-- REGISTER FORM -->
+    <div id="register-form" class="hidden">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <input type="text" id="reg-name" class="form-input" placeholder="Alex Johnson" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" id="reg-email" class="form-input" placeholder="you@company.com" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" id="reg-password" class="form-input" placeholder="Min 6 characters" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Account type</label>
+        <select id="reg-role" class="form-select">
+          <option value="member">Member — I'll be assigned tasks</option>
+          <option value="admin">Admin — I'll manage projects & team</option>
+        </select>
+      </div>
+      <button class="btn btn-primary w-full" style="justify-content:center;margin-top:8px" onclick="handleRegister()">
+        Create Account
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  MAIN APP                                              -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="app-screen" class="hidden">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">Task<span>Flow</span></div>
+
+    <div class="sidebar-section-label nav-text">Menu</div>
+    <button class="nav-item active" onclick="navigate('dashboard')">
+      <span class="nav-icon">📊</span><span class="nav-text">Dashboard</span>
+    </button>
+    <button class="nav-item" onclick="navigate('projects')">
+      <span class="nav-icon">📁</span><span class="nav-text">Projects</span>
+    </button>
+    <button class="nav-item" onclick="navigate('tasks')">
+      <span class="nav-icon">✅</span><span class="nav-text">My Tasks</span>
+    </button>
+    <div id="admin-nav" class="hidden">
+      <div class="sidebar-section-label nav-text">Admin</div>
+      <button class="nav-item" onclick="navigate('team')">
+        <span class="nav-icon">👥</span><span class="nav-text">Team</span>
+      </button>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-profile">
+        <div class="avatar" id="sidebar-avatar"></div>
+        <div class="user-info">
+          <div class="user-name" id="sidebar-name"></div>
+          <div class="user-role" id="sidebar-role"></div>
+        </div>
+      </div>
+      <button class="nav-item mt-2" onclick="handleLogout()" style="color:var(--danger)">
+        <span class="nav-icon">🚪</span><span class="nav-text">Sign Out</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="main" id="main-content">
+    <!-- Pages injected here by JS -->
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════ -->
+<!--  MODALS                                               -->
+<!-- ═══════════════════════════════════════════════════════ -->
+<div id="modal-container"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════
+const API = window.API_URL || 'http://localhost:5000/api';
+let currentUser = null;
+let currentPage = 'dashboard';
+
+// ═══════════════════════════════════════════════════════════
+//  API HELPERS
+// ═══════════════════════════════════════════════════════════
+async function api(method, path, body = null) {
+  const token = localStorage.getItem('tf_token');
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' }
+  };
+  if (token) opts.headers['Authorization'] = `Bearer ${token}`;
+  if (body) opts.body = JSON.stringify(body);
+
+  const res = await fetch(`${API}${path}`, opts);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Request failed');
+  return data;
+}
+
+const GET = (path) => api('GET', path);
+const POST = (path, body) => api('POST', path, body);
+const PATCH = (path, body) => api('PATCH', path, body);
+const DELETE = (path) => api('DELETE', path);
+
+// ═══════════════════════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════════════════════
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0) === (tab === 'login'));
+  });
+  document.getElementById('login-form').classList.toggle('hidden', tab !== 'login');
+  document.getElementById('register-form').classList.toggle('hidden', tab !== 'register');
+  document.getElementById('auth-alert').innerHTML = '';
+}
+
+function showAuthAlert(msg, type = 'error') {
+  document.getElementById('auth-alert').innerHTML =
+    `<div class="alert alert-${type}">${msg}</div>`;
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAuthAlert('Please fill in all fields.');
+  try {
+    const data = await POST('/auth/login', { email, password });
+    localStorage.setItem('tf_token', data.token);
+    currentUser = data.user;
+    enterApp();
+  } catch (e) {
+    showAuthAlert(e.message);
+  }
+}
+
+async function handleRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const role = document.getElementById('reg-role').value;
+  if (!name || !email || !password) return showAuthAlert('Please fill in all fields.');
+  try {
+    const data = await POST('/auth/register', { name, email, password, role });
+    localStorage.setItem('tf_token', data.token);
+    currentUser = data.user;
+    enterApp();
+  } catch (e) {
+    showAuthAlert(e.message);
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem('tf_token');
+  currentUser = null;
+  document.getElementById('auth-screen').classList.remove('hidden');
+  document.getElementById('app-screen').classList.add('hidden');
+}
+
+function enterApp() {
+  document.getElementById('auth-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('hidden');
+  const av = document.getElementById('sidebar-avatar');
+  av.textContent = currentUser.name[0].toUpperCase();
+  av.style.background = currentUser.avatar_color || '#6366f1';
+  document.getElementById('sidebar-name').textContent = currentUser.name;
+  document.getElementById('sidebar-role').textContent = currentUser.role;
+  if (currentUser.role === 'admin') document.getElementById('admin-nav').classList.remove('hidden');
+  navigate('dashboard');
+}
+
+async function checkAuth() {
+  const token = localStorage.getItem('tf_token');
+  if (!token) return;
+  try {
+    const data = await GET('/auth/me');
+    currentUser = data.user;
+    enterApp();
+  } catch (_) {
+    localStorage.removeItem('tf_token');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function navigate(page, params = {}) {
+  currentPage = page;
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { dashboard: 0, projects: 1, tasks: 2, team: 0 };
+  const navItems = document.querySelectorAll('.nav-item');
+  if (page === 'team' && currentUser?.role === 'admin') {
+    document.querySelectorAll('#admin-nav .nav-item')[0]?.classList.add('active');
+  } else {
+    navItems[navMap[page] ?? 0]?.classList.add('active');
+  }
+  const pages = { dashboard: renderDashboard, projects: renderProjects, tasks: renderTasks, team: renderTeam, project_detail: renderProjectDetail };
+  const renderer = pages[page];
+  if (renderer) renderer(params);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════
+function setContent(html) {
+  document.getElementById('main-content').innerHTML = html;
+}
+
+function loading() {
+  setContent('<div class="loading-center"><div class="spinner"></div></div>');
+}
+
+function statusBadge(s) {
+  return `<span class="badge badge-${s}">${s.replace('_', ' ')}</span>`;
+}
+
+function priorityEl(p) {
+  return `<span class="priority-${p}"><span class="priority-dot dot-${p}"></span>${p}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function isOverdue(d, status) {
+  return d && status !== 'done' && new Date(d) < new Date();
+}
+
+function avatarHtml(name, color, size = '') {
+  return `<div class="avatar ${size}" style="background:${color||'#6366f1'}">${name?.[0]?.toUpperCase()||'?'}</div>`;
+}
+
+function showModal(html) {
+  document.getElementById('modal-container').innerHTML = html;
+}
+function closeModal() {
+  document.getElementById('modal-container').innerHTML = '';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  DASHBOARD PAGE
+// ═══════════════════════════════════════════════════════════
+async function renderDashboard() {
+  loading();
+  try {
+    const d = await GET('/dashboard');
+    const { taskStats: t, projectStats: p, recentTasks, overdueTasks, userCount } = d;
+
+    const adminCard = currentUser.role === 'admin' ? `
+      <div class="stat-card" style="--accent-color:#8b5cf6">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-value">${userCount}</div>
+      </div>` : '';
+
+    const overdueRows = overdueTasks.length ? overdueTasks.map(t => `
+      <tr>
+        <td><div class="truncate" style="max-width:200px">${t.title}</div></td>
+        <td>${t.project_name || '—'}</td>
+        <td>${priorityEl(t.priority)}</td>
+        <td class="task-due overdue">${fmtDate(t.due_date)}</td>
+      </tr>`).join('') : `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px">No overdue tasks 🎉</td></tr>`;
+
+    const recentRows = recentTasks.length ? recentTasks.map(t => `
+      <div class="task-row" onclick="openTaskDetail(${t.id})">
+        <div class="task-check ${t.status === 'done' ? 'done' : ''}"></div>
+        <div class="task-title-cell ${t.status === 'done' ? 'done' : ''}">${t.title}</div>
+        <div class="text-sm text-muted">${t.project_name || ''}</div>
+        ${statusBadge(t.status)}
+      </div>`).join('') : `<div class="empty-state"><div>No tasks yet</div></div>`;
+
+    setContent(`
+      <div class="page-header">
+        <div>
+          <div class="page-title">Good ${greeting()}, ${currentUser.name.split(' ')[0]} 👋</div>
+          <div class="page-subtitle">Here's what's happening across your workspace</div>
+        </div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:28px">
+        <div class="stat-card" style="--accent-color:var(--primary)">
+          <div class="stat-icon">📋</div>
+          <div class="stat-label">Total Tasks</div>
+          <div class="stat-value">${t.total}</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--info)">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">In Progress</div>
+          <div class="stat-value">${t.in_progress}</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--success)">
+          <div class="stat-icon">✅</div>
+          <div class="stat-label">Completed</div>
+          <div class="stat-value">${t.done}</div>
+        </div>
+        <div class="stat-card" style="--accent-color:var(--danger)">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-label">Overdue</div>
+          <div class="stat-value">${t.overdue}</div>
+        </div>
+        ${adminCard}
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Recent Tasks</div>
+          ${recentRows}
+        </div>
+        <div class="card">
+          <div class="card-title">⚠️ Overdue Tasks</div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Task</th><th>Project</th><th>Priority</th><th>Due</th></tr></thead>
+              <tbody>${overdueRows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `);
+  } catch (e) {
+    setContent(`<div class="alert alert-error">Failed to load dashboard: ${e.message}</div>`);
+  }
+}
+
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'morning' : h < 17 ? 'afternoon' : 'evening';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PROJECTS PAGE
+// ═══════════════════════════════════════════════════════════
+async function renderProjects() {
+  loading();
+  try {
+    const { projects } = await GET('/projects');
+    const canCreate = currentUser.role === 'admin';
+    const cards = projects.length ? projects.map(p => {
+      const total = parseInt(p.task_count) || 0;
+      const done = parseInt(p.completed_tasks) || 0;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      return `
+        <div class="project-card" onclick="navigate('project_detail', {id:${p.id}})">
+          <div class="flex justify-between items-center" style="margin-bottom:8px">
+            ${statusBadge(p.status)}
+            <span class="text-xs text-muted">${fmtDate(p.deadline)}</span>
+          </div>
+          <div class="project-name">${p.name}</div>
+          <div class="project-desc">${p.description || 'No description provided.'}</div>
+          <div class="project-meta">
+            <span>👤 ${p.owner_name || 'Unknown'}</span>
+            <span>👥 ${p.member_count} members</span>
+            <span>📋 ${total} tasks</span>
+          </div>
+          <div class="project-progress">
+            <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <div class="progress-label">${pct}% complete</div>
+          </div>
+        </div>`;
+    }).join('') : `<div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-icon">📁</div>
+        <div class="empty-title">No projects yet</div>
+        <div class="empty-desc">${canCreate ? 'Create your first project to get started.' : 'You haven\'t been added to any projects yet.'}</div>
+      </div>`;
+
+    setContent(`
+      <div class="page-header">
+        <div>
+          <div class="page-title">Projects</div>
+          <div class="page-subtitle">${projects.length} project${projects.length !== 1 ? 's' : ''} total</div>
+        </div>
+        ${canCreate ? `<button class="btn btn-primary" onclick="openCreateProject()">+ New Project</button>` : ''}
+      </div>
+      <div class="grid-2">${cards}</div>
+    `);
+  } catch (e) {
+    setContent(`<div class="alert alert-error">${e.message}</div>`);
+  }
+}
+
+function openCreateProject() {
+  showModal(`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title">Create New Project</div>
+        <div id="project-modal-alert"></div>
+        <div class="form-group">
+          <label class="form-label">Project name *</label>
+          <input type="text" id="pj-name" class="form-input" placeholder="e.g. Website Redesign" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="pj-desc" class="form-input" placeholder="What's this project about?"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deadline</label>
+          <input type="date" id="pj-deadline" class="form-input" />
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="submitCreateProject()">Create Project</button>
+        </div>
+      </div>
+    </div>`);
+}
+
+async function submitCreateProject() {
+  const name = document.getElementById('pj-name').value.trim();
+  const description = document.getElementById('pj-desc').value.trim();
+  const deadline = document.getElementById('pj-deadline').value;
+  if (!name) {
+    document.getElementById('project-modal-alert').innerHTML = '<div class="alert alert-error">Project name is required.</div>';
+    return;
+  }
+  try {
+    await POST('/projects', { name, description, deadline });
+    closeModal();
+    renderProjects();
+  } catch (e) {
+    document.getElementById('project-modal-alert').innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  PROJECT DETAIL PAGE
+// ═══════════════════════════════════════════════════════════
+async function renderProjectDetail({ id }) {
+  loading();
+  try {
+    const [{ project, members }, { tasks }] = await Promise.all([
+      GET(`/projects/${id}`),
+      GET(`/tasks?project_id=${id}`)
+    ]);
+
+    const isAdmin = currentUser.role === 'admin';
+    const taskRows = tasks.length ? tasks.map(t => `
+      <div class="task-row" onclick="openTaskDetail(${t.id})">
+        <div class="task-check ${t.status === 'done' ? 'done' : ''}"></div>
+        <div class="task-title-cell ${t.status === 'done' ? 'done' : ''}" style="flex:1">${t.title}</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-right:8px">
+          ${t.assignee_name ? `${avatarHtml(t.assignee_name, t.assignee_color)} <span class="text-sm text-muted">${t.assignee_name}</span>` : '<span class="text-sm text-muted">Unassigned</span>'}
+        </div>
+        ${priorityEl(t.priority)}
+        ${statusBadge(t.status)}
+        <span class="text-sm ${isOverdue(t.due_date, t.status) ? 'task-due overdue' : 'text-muted'}">${fmtDate(t.due_date)}</span>
+      </div>`).join('') : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No tasks yet</div><div class="empty-desc">Add the first task to this project.</div></div>`;
+
+    const memberHtml = members.map(m => `
+      <div class="flex items-center gap-2" style="padding:8px 0;border-bottom:1px solid var(--border)">
+        ${avatarHtml(m.name, m.avatar_color)}
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${m.name}</div>
+          <div style="font-size:11px;color:var(--text-muted)">${m.email}</div>
+        </div>
+        <span class="badge ${m.role === 'admin' ? 'badge-active' : 'badge-todo'}">${m.role}</span>
+        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="removeMember(${id}, ${m.id})">Remove</button>` : ''}
+      </div>`).join('');
+
+    setContent(`
+      <div class="page-header">
+        <div>
+          <button class="btn btn-ghost btn-sm" style="margin-bottom:10px" onclick="navigate('projects')">← Back</button>
+          <div class="page-title">${project.name}</div>
+          <div class="page-subtitle">${project.description || 'No description'} · ${statusBadge(project.status)}</div>
+        </div>
+        ${isAdmin ? `<div class="flex gap-2">
+          <button class="btn btn-ghost" onclick="openAddMember(${id})">+ Add Member</button>
+          <button class="btn btn-primary" onclick="openCreateTask(${id})">+ Add Task</button>
+        </div>` : `<button class="btn btn-primary" onclick="openCreateTask(${id})">+ Add Task</button>`}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 280px;gap:24px">
+        <div>
+          <div class="card">
+            <div class="card-title">Tasks (${tasks.length})</div>
+            ${taskRows}
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="card-title">Team Members</div>
+            ${memberHtml || '<div class="text-muted text-sm">No members yet.</div>'}
+          </div>
+          ${isAdmin ? `
+          <div class="card" style="margin-top:16px">
+            <div class="card-title">Project Settings</div>
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select class="form-select" id="pj-status-select" onchange="updateProjectStatus(${id}, this.value)">
+                <option value="active" ${project.status==='active'?'selected':''}>Active</option>
+                <option value="completed" ${project.status==='completed'?'selected':''}>Completed</option>
+                <option value="on_hold" ${project.status==='on_hold'?'selected':''}>On Hold</option>
+              </select>
+            </div>
+            <button class="btn btn-danger btn-sm w-full" style="justify-content:center" onclick="deleteProject(${id})">Delete Project</button>
+          </div>` : ''}
+        </div>
+      </div>
+    `);
+  } catch (e) {
+    setContent(`<div class="alert alert-error">${e.message}</div>`);
+  }
+}
+
+async function updateProjectStatus(id, status) {
+  try { await PATCH(`/projects/${id}`, { status }); } catch (e) { alert(e.message); }
+}
+
+async function deleteProject(id) {
+  if (!confirm('Delete this project? This will also delete all tasks.')) return;
+  try { await DELETE(`/projects/${id}`); navigate('projects'); } catch (e) { alert(e.message); }
+}
+
+function openAddMember(projectId) {
+  showModal(`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title">Add Team Member</div>
+        <div class="form-group">
+          <label class="form-label">Search by name or email</label>
+          <input type="text" id="member-search" class="form-input" placeholder="Start typing..." oninput="searchUsers(this.value, ${projectId})" />
+        </div>
+        <div id="user-results"></div>
+      </div>
+    </div>`);
+}
+
+async function searchUsers(q, projectId) {
+  if (q.length < 2) return;
+  try {
+    const { users } = await GET(`/users/search?q=${encodeURIComponent(q)}`);
+    const html = users.length ? users.map(u => `
+      <div class="flex items-center gap-2" style="padding:10px;border-radius:8px;cursor:pointer;transition:background 0.15s" onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''" onclick="addMember(${projectId}, ${u.id})">
+        ${avatarHtml(u.name, u.avatar_color)}
+        <div>
+          <div style="font-size:13px;font-weight:500">${u.name}</div>
+          <div style="font-size:12px;color:var(--text-muted)">${u.email}</div>
+        </div>
+      </div>`).join('') : '<div class="text-muted text-sm" style="padding:12px">No users found.</div>';
+    document.getElementById('user-results').innerHTML = html;
+  } catch (_) {}
+}
+
+async function addMember(projectId, userId) {
+  try {
+    await POST(`/projects/${projectId}/members`, { user_id: userId });
+    closeModal();
+    navigate('project_detail', { id: projectId });
+  } catch (e) { alert(e.message); }
+}
+
+async function removeMember(projectId, userId) {
+  if (!confirm('Remove this member?')) return;
+  try {
+    await DELETE(`/projects/${projectId}/members/${userId}`);
+    navigate('project_detail', { id: projectId });
+  } catch (e) { alert(e.message); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TASKS PAGE
+// ═══════════════════════════════════════════════════════════
+let taskFilter = 'all';
+
+async function renderTasks(params = {}) {
+  loading();
+  try {
+    const qs = currentUser.role === 'admin' ? '' : `?assignee_id=${currentUser.id}`;
+    const { tasks } = await GET(`/tasks${qs}`);
+    const filtered = taskFilter === 'all' ? tasks : tasks.filter(t => t.status === taskFilter);
+    const counts = { all: tasks.length, todo: 0, in_progress: 0, review: 0, done: 0 };
+    tasks.forEach(t => { if (counts[t.status] !== undefined) counts[t.status]++; });
+
+    const rows = filtered.length ? filtered.map(t => `
+      <tr onclick="openTaskDetail(${t.id})" style="cursor:pointer">
+        <td>
+          <div style="font-weight:500">${t.title}</div>
+          <div class="text-xs text-muted">${t.project_name || '—'}</div>
+        </td>
+        <td>${statusBadge(t.status)}</td>
+        <td>${priorityEl(t.priority)}</td>
+        <td>
+          ${t.assignee_name ? `<div class="flex items-center gap-2">${avatarHtml(t.assignee_name, t.assignee_color)} ${t.assignee_name}</div>` : '<span class="text-muted">—</span>'}
+        </td>
+        <td class="${isOverdue(t.due_date, t.status) ? 'task-due overdue' : 'text-muted'}">${fmtDate(t.due_date)}</td>
+        <td>
+          <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openEditTask(${t.id})">Edit</button>
+        </td>
+      </tr>`).join('') : `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">No tasks here</div></div></td></tr>`;
+
+    const statuses = ['all', 'todo', 'in_progress', 'review', 'done'];
+    const filterBtns = statuses.map(s => `
+      <button class="filter-btn ${taskFilter === s ? 'active' : ''}" onclick="setTaskFilter('${s}')">
+        ${s === 'all' ? 'All' : s.replace('_', ' ')} <span style="opacity:0.6">(${counts[s] || 0})</span>
+      </button>`).join('');
+
+    setContent(`
+      <div class="page-header">
+        <div>
+          <div class="page-title">${currentUser.role === 'admin' ? 'All Tasks' : 'My Tasks'}</div>
+          <div class="page-subtitle">${tasks.length} task${tasks.length !== 1 ? 's' : ''} total</div>
+        </div>
+        <button class="btn btn-primary" onclick="openCreateTask()">+ New Task</button>
+      </div>
+      <div class="filter-bar">${filterBtns}</div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Task</th><th>Status</th><th>Priority</th><th>Assignee</th><th>Due Date</th><th></th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `);
+  } catch (e) {
+    setContent(`<div class="alert alert-error">${e.message}</div>`);
+  }
+}
+
+function setTaskFilter(f) {
+  taskFilter = f;
+  renderTasks();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TASK MODALS
+// ═══════════════════════════════════════════════════════════
+async function openCreateTask(projectId = null) {
+  const { projects } = await GET('/projects');
+  const projectOpts = projects.map(p => `<option value="${p.id}" ${p.id == projectId ? 'selected' : ''}>${p.name}</option>`).join('');
+  const { users } = await GET('/users/search?q=');
+
+  showModal(`
+    <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="modal-title">Create New Task</div>
+        <div id="task-modal-alert"></div>
+        <div class="form-group">
+          <label class="form-label">Task title *</label>
+          <input type="text" id="t-title" class="form-input" placeholder="What needs to be done?" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="t-desc" class="form-input" placeholder="Add more details..."></textarea>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Project *</label>
+            <select id="t-project" class="form-select">${projectOpts}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select id="t-priority" class="form-select">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+              <option value="urgent">Urgent</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assign to</label>
+            <select id="t-assignee" class="form-select">
+              <option value="">Unassigned</option>
+              ${users.map(u => `<option value="${u.id}">${u.name}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due date</label>
+            <input type="date" id="t-due" class="form-input" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+          <button class="btn btn-primary" onclick="submitCreateTask()">Create Task</button>
+        </div>
+      </div>
+    </div>`);
+}
+
+async function submitCreateTask() {
+  const title = document.getElementById('t-title').value.trim();
+  const description = document.getElementById('t-desc').value.trim();
+  const project_id = document.getElementById('t-project').value;
+  const priority = document.getElementById('t-priority').value;
+  const assignee_id = document.getElementById('t-assignee').value || null;
+  const due_date = document.getElementById('t-due').value || null;
+  if (!title) { document.getElementById('task-modal-alert').innerHTML = '<div class="alert alert-error">Title is required.</div>'; return; }
+  try {
+    await POST('/tasks', { title, description, project_id, priority, assignee_id, due_date });
+    closeModal();
+    if (currentPage === 'tasks') renderTasks();
+    else if (currentPage === 'project_detail') navigate('project_detail', { id: project_id });
+    else renderDashboard();
+  } catch (e) {
+    document.getElementById('task-modal-alert').innerHTML = `<div class="alert alert-error">${e.message}</div>`;
+  }
+}
+
+async function openTaskDetail(taskId) {
+  try {
+    const { task, comments } = await GET(`/tasks/${taskId}`);
+    const commentHtml = comments.length ? comments.map(c => `
+      <div class="comment-item">
+        <div class="flex items-center gap-2">
+          ${avatarHtml(c.user_name, c.avatar_color)}
+          <strong style="font-size:13px">${c.user_name}</strong>
+        </div>
+        <div style="font-size:14px;margin-top:8px;line-height:1.6">${c.content}</div>
+        <div class="comment-meta">${fmtDate(c.created_at)}</div>
+      </div>`).join('') : '<div class="text-muted text-sm">No comments yet.</div>';
+
+    showModal(`
+      <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal modal-lg">
+          <button class="modal-close" onclick="closeModal()">✕</button>
+          <div class="task-detail-header">
+            <div style="margin-bottom:8px">${priorityEl(task.priority)} · ${statusBadge(task.status)}</div>
+            <div style="font-size:20px;font-weight:700;margin-bottom:8px">${task.title}</div>
+            <div class="text-muted text-sm">${task.description || 'No description.'}</div>
+          </div>
+          <div class="grid-2" style="margin-bottom:20px">
+            <div><div class="text-xs text-muted" style="margin-bottom:4px">PROJECT</div><div style="font-size:13px">${task.project_name || '—'}</div></div>
+            <div><div class="text-xs text-muted" style="margin-bottom:4px">ASSIGNEE</div>
+              <div class="flex items-center gap-2" style="font-size:13px">
+                ${task.assignee_name ? `${avatarHtml(task.assignee_name, task.assignee_color)} ${task.assignee_name}` : '—'}
+              </div>
+            </div>
+            <div><div class="text-xs text-muted" style="margin-bottom:4px">DUE DATE</div><div class="font-size:13px ${isOverdue(task.due_date, task.status) ? 'task-due overdue' : ''}">${fmtDate(task.due_date)}</div></div>
+            <div><div class="text-xs text-muted" style="margin-bottom:4px">CREATED BY</div><div style="font-size:13px">${task.creator_name || '—'}</div></div>
+          </div>
+          <div style="margin-bottom:16px">
+            <div class="form-label" style="margin-bottom:8px">Update Status</div>
+            <div class="flex gap-2" style="flex-wrap:wrap">
+              ${['todo','in_progress','review','done'].map(s => `
+                <button class="filter-btn ${task.status===s?'active':''}" onclick="quickUpdateStatus(${task.id},'${s}',this)">${s.replace('_',' ')}</button>`).join('')}
+            </div>
+          </div>
+          <div>
+            <div class="card-title">Comments</div>
+            <div id="comment-list" style="margin-bottom:12px">${commentHtml}</div>
+            <div class="flex gap-2">
+              <input type="text" id="comment-input" class="form-input" placeholder="Add a comment..." style="flex:1" />
+              <button class="btn btn-primary" onclick="submitComment(${task.id})">Send</button>
+            </div>
+          </div>
+        </div>
+      </div>`);
+  } catch (e) { alert('Failed to load task: ' + e.message); }
+}
+
+async function quickUpdateStatus(taskId, status, btn) {
+  try {
+    await PATCH(`/tasks/${taskId}`, { status });
+    btn.closest('.flex').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  } catch (e) { alert(e.message); }
+}
+
+async function submitComment(taskId) {
+  const input = document.getElementById('comment-input');
+  const content = input.value.trim();
+  if (!content) return;
+  try {
+    const { comment } = await POST(`/tasks/${taskId}/comments`, { content });
+    input.value = '';
+    const list = document.getElementById('comment-list');
+    list.innerHTML += `
+      <div class="comment-item">
+        <div class="flex items-center gap-2">
+          ${avatarHtml(currentUser.name, currentUser.avatar_color)}
+          <strong style="font-size:13px">${currentUser.name}</strong>
+        </div>
+        <div style="font-size:14px;margin-top:8px">${content}</div>
+        <div class="comment-meta">Just now</div>
+      </div>`;
+  } catch (e) { alert(e.message); }
+}
+
+async function openEditTask(taskId) {
+  try {
+    const { task } = await GET(`/tasks/${taskId}`);
+    const { users } = await GET('/users/search?q=');
+    showModal(`
+      <div class="modal-overlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal">
+          <button class="modal-close" onclick="closeModal()">✕</button>
+          <div class="modal-title">Edit Task</div>
+          <div class="form-group">
+            <label class="form-label">Title</label>
+            <input type="text" id="et-title" class="form-input" value="${task.title}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea id="et-desc" class="form-input">${task.description || ''}</textarea>
+          </div>
+          <div class="grid-2">
+            <div class="form-group">
+              <label class="form-label">Status</label>
+              <select id="et-status" class="form-select">
+                ${['todo','in_progress','review','done'].map(s=>`<option value="${s}" ${task.status===s?'selected':''}>${s.replace('_',' ')}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Priority</label>
+              <select id="et-priority" class="form-select">
+                ${['low','medium','high','urgent'].map(p=>`<option value="${p}" ${task.priority===p?'selected':''}>${p}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Assignee</label>
+              <select id="et-assignee" class="form-select">
+                <option value="">Unassigned</option>
+                ${users.map(u=>`<option value="${u.id}" ${task.assignee_id==u.id?'selected':''}>${u.name}</option>`).join('')}
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Due date</label>
+              <input type="date" id="et-due" class="form-input" value="${task.due_date ? task.due_date.split('T')[0] : ''}" />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-danger" onclick="deleteTask(${task.id})">Delete</button>
+            <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+            <button class="btn btn-primary" onclick="submitEditTask(${task.id})">Save Changes</button>
+          </div>
+        </div>
+      </div>`);
+  } catch (e) { alert(e.message); }
+}
+
+async function submitEditTask(taskId) {
+  const title = document.getElementById('et-title').value.trim();
+  const description = document.getElementById('et-desc').value.trim();
+  const status = document.getElementById('et-status').value;
+  const priority = document.getElementById('et-priority').value;
+  const assignee_id = document.getElementById('et-assignee').value || null;
+  const due_date = document.getElementById('et-due').value || null;
+  try {
+    await PATCH(`/tasks/${taskId}`, { title, description, status, priority, assignee_id, due_date });
+    closeModal();
+    renderTasks();
+  } catch (e) { alert(e.message); }
+}
+
+async function deleteTask(taskId) {
+  if (!confirm('Delete this task?')) return;
+  try { await DELETE(`/tasks/${taskId}`); closeModal(); renderTasks(); } catch (e) { alert(e.message); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  TEAM PAGE (Admin only)
+// ═══════════════════════════════════════════════════════════
+async function renderTeam() {
+  loading();
+  try {
+    const { users } = await GET('/users');
+    const rows = users.map(u => `
+      <tr>
+        <td>
+          <div class="flex items-center gap-3">
+            ${avatarHtml(u.name, u.avatar_color)}
+            <div>
+              <div style="font-weight:500">${u.name}</div>
+              <div class="text-xs text-muted">${u.email}</div>
+            </div>
+          </div>
+        </td>
+        <td>${statusBadge(u.role === 'admin' ? 'active' : 'todo')}<span style="margin-left:4px;text-transform:capitalize">${u.role}</span></td>
+        <td class="text-muted">${fmtDate(u.created_at)}</td>
+        <td>
+          <select class="form-select" style="width:auto;padding:4px 10px;font-size:13px" onchange="updateRole(${u.id}, this.value)" ${u.id === currentUser.id ? 'disabled' : ''}>
+            <option value="member" ${u.role==='member'?'selected':''}>Member</option>
+            <option value="admin" ${u.role==='admin'?'selected':''}>Admin</option>
+          </select>
+        </td>
+      </tr>`).join('');
+
+    setContent(`
+      <div class="page-header">
+        <div>
+          <div class="page-title">Team Members</div>
+          <div class="page-subtitle">${users.length} registered users</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>User</th><th>Role</th><th>Joined</th><th>Change Role</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>
+    `);
+  } catch (e) {
+    setContent(`<div class="alert alert-error">${e.message}</div>`);
+  }
+}
+
+async function updateRole(userId, role) {
+  try { await PATCH(`/users/${userId}/role`, { role }); } catch (e) { alert(e.message); }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  BOOT
+// ═══════════════════════════════════════════════════════════
+checkAuth();
+</script>
+</body>
+</html>

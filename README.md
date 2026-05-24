@@ -1,39 +1,5 @@
-# TaskFlow — Team Task Manager
+# TaskFlow — Deployment Guide
 
-A full-stack web application for managing team projects, assigning tasks, and tracking progress with role-based access control.
-
-**Live Demo:** [your-railway-url-here]  
-**Tech Stack:** Node.js · Express · PostgreSQL · Vanilla JS · HTML/CSS
-
----
-
-## 📁 Project Structure
-
-```
-taskflow/
-├── backend/
-│   ├── db/index.js          ← Database connection + table setup
-│   ├── middleware/auth.js   ← JWT authentication + role checks
-│   ├── routes/
-│   │   ├── auth.js          ← /api/auth (login, register)
-│   │   ├── users.js         ← /api/users (list, search, role update)
-│   │   ├── projects.js      ← /api/projects (CRUD + members)
-│   │   ├── tasks.js         ← /api/tasks (CRUD + comments)
-│   │   └── dashboard.js     ← /api/dashboard (stats)
-│   ├── server.js            ← Main entry point
-│   ├── package.json
-│   └── .env.example
-└── frontend/
-    └── index.html           ← Entire frontend (single file)
-```
-
----
-
-## 🚀 Deployment Guide (Railway) — Step by Step
-
-This guide assumes you have never used a terminal before. Follow every step carefully.
-
----
 
 ### STEP 1: Install Node.js
 
@@ -181,7 +147,7 @@ Option B — **Use Netlify** (even easier for static files):
 
 ---
 
-## 🔧 Running Locally (for testing before deployment)
+### Running Locally (for testing before deployment)
 
 ```bash
 # 1. Go to backend folder
@@ -200,119 +166,3 @@ npm run dev
 # 5. Open frontend/index.html in your browser
 # It connects to localhost:5000 by default
 ```
-
----
-
-## 🌐 API Reference
-
-### Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/api/auth/register` | Create account |
-| POST | `/api/auth/login` | Login, get JWT token |
-| GET | `/api/auth/me` | Get current user |
-
-### Projects
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/projects` | List projects |
-| POST | `/api/projects` | Create project (Admin) |
-| GET | `/api/projects/:id` | Get project + members |
-| PATCH | `/api/projects/:id` | Update project (Admin) |
-| DELETE | `/api/projects/:id` | Delete project (Admin) |
-| POST | `/api/projects/:id/members` | Add member (Admin) |
-
-### Tasks
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/tasks` | List tasks (filtered) |
-| POST | `/api/tasks` | Create task |
-| GET | `/api/tasks/:id` | Get task + comments |
-| PATCH | `/api/tasks/:id` | Update task |
-| DELETE | `/api/tasks/:id` | Delete task |
-| POST | `/api/tasks/:id/comments` | Add comment |
-
-### Dashboard
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/api/dashboard` | Get stats + recent/overdue |
-
----
-
-## 🎤 INTERVIEW CHEAT SHEET
-
-Read this once a day for 3 days. You'll know it cold.
-
----
-
-### Q: "Walk me through your project."
-
-**Say this:**
-> "I built TaskFlow, a full-stack team task manager. It has two roles — Admin and Member. Admins can create projects, add team members, and manage everything. Members can see their assigned tasks and update their status. On the backend I used Node.js with Express to build REST APIs, and PostgreSQL as the database. The frontend is pure HTML, CSS, and JavaScript — no frameworks. I deployed it on Railway."
-
----
-
-### Q: "Why did you choose this tech stack?"
-
-**Say this:**
-> "I chose Node.js and Express because they're lightweight and fast to build APIs with. PostgreSQL because the data has clear relationships — users belong to projects, tasks belong to projects and have assignees — so a relational database made sense. For the frontend I went with vanilla JavaScript because it keeps things simple and there's no build step needed."
-
----
-
-### Q: "How does login/authentication work?"
-
-**Say this:**
-> "When a user logs in, the backend checks their email and password. The password is never stored as plain text — it's hashed using bcrypt before saving. If the credentials match, the server generates a JWT — a JSON Web Token — which is basically a signed string that proves who you are. The frontend stores this token in localStorage and sends it with every request in the Authorization header. The backend verifies it on every protected route."
-
----
-
-### Q: "What is role-based access control and how did you implement it?"
-
-**Say this:**
-> "Role-based access control means different users have different permissions. In my app, Admins can create projects, delete tasks, and manage team members. Members can only view their projects and update their own tasks. I implemented this with middleware — a function that runs before the route handler. It checks the user's role from the database and either allows the request or returns a 403 Forbidden error."
-
----
-
-### Q: "What is a REST API?"
-
-**Say this:**
-> "REST is a way of structuring APIs using standard HTTP methods. GET to fetch data, POST to create, PATCH to update, DELETE to remove. Each URL represents a resource — like `/api/projects` for projects. I followed REST conventions throughout — for example, `/api/projects/5/members` to manage members of project 5."
-
----
-
-### Q: "What was the hardest part?"
-
-**Say this:**
-> "The trickiest part was the access control logic. For example, when fetching tasks, admins should see all tasks, but members should only see tasks in their projects or assigned to them. Writing the SQL queries to handle both cases cleanly took some thinking — I used conditional WHERE clauses based on the user's role."
-
----
-
-### Q: "What is a JWT token?"
-
-**Say this:**
-> "JWT stands for JSON Web Token. It has three parts separated by dots — a header, a payload, and a signature. The payload contains user data like the user ID and role. The signature is generated using a secret key on the server, so no one can fake a token without knowing the key. It's stateless — the server doesn't need to store sessions, it just verifies the signature on each request."
-
----
-
-### Q: "What is bcrypt?"
-
-**Say this:**
-> "Bcrypt is a password hashing algorithm. Instead of storing passwords in plain text, bcrypt converts them into a fixed-length hash. The same password always produces a different hash because of a random salt. To verify a login, you hash the entered password and compare it to the stored hash. Even if someone steals the database, they can't reverse the hashes to get the original passwords."
-
----
-
-### Q: "How do projects and tasks relate to each other in your database?"
-
-**Say this:**
-> "I have four main tables — users, projects, tasks, and project_members. Tasks have a foreign key pointing to projects, meaning each task belongs to one project. project_members is a join table that connects users and projects, since one user can be in many projects and one project can have many users. This is called a many-to-many relationship. Tasks also have a foreign key to users for the assignee."
-
----
-
-### Q: "What would you improve if you had more time?"
-
-**Say this:**
-> "A few things — real-time updates using WebSockets so you can see task changes live without refreshing. Email notifications for task assignments. A Kanban board view with drag-and-drop. And proper test coverage — I'd add unit tests for the API routes using Jest."
-
----
-
-*Good luck — you've got this.* 🚀
