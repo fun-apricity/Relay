@@ -147,22 +147,4 @@ Option B — **Use Netlify** (even easier for static files):
 
 ---
 
-### Running Locally (for testing before deployment)
 
-```bash
-# 1. Go to backend folder
-cd taskflow/backend
-
-# 2. Install dependencies
-npm install
-
-# 3. Create .env file (copy from example)
-cp .env.example .env
-# Then edit .env and fill in your local PostgreSQL details
-
-# 4. Start the server
-npm run dev
-
-# 5. Open frontend/index.html in your browser
-# It connects to localhost:5000 by default
-```
