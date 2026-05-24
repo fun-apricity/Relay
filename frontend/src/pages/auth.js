@@ -9,7 +9,7 @@ export function renderAuth() {
   screen.innerHTML = `
     <div class="auth-container">
       <div class="auth-header">
-        <div class="auth-logo">_task<span>flow</span></div>
+        <div class="auth-logo">_<span>relay</span></div>
         <div class="auth-subtitle">
           A minimal, monospace task manager for<br />teams that build things.
         </div>
@@ -25,7 +25,7 @@ export function renderAuth() {
         </div>
       </div>
       <div style="text-align:center;margin-top:16px">
-        <span style="font-size:0.65rem;color:var(--text-dim)">TaskFlow · v1.0</span>
+        <span style="font-size:0.65rem;color:var(--text-dim)">Relay · v1.0</span>
       </div>
     </div>
   `;
@@ -145,7 +145,7 @@ async function handleLogin() {
 
   try {
     const data = await POST('/auth/login', { email, password });
-    localStorage.setItem('tf_token', data.token);
+    localStorage.setItem('relay_token', data.token);
     setState({ user: data.user });
     enterApp();
   } catch (e) {
@@ -169,7 +169,7 @@ async function handleRegister() {
 
   try {
     const data = await POST('/auth/register', { name, email, password, role });
-    localStorage.setItem('tf_token', data.token);
+    localStorage.setItem('relay_token', data.token);
     setState({ user: data.user });
     enterApp();
   } catch (e) {
@@ -186,20 +186,20 @@ function enterApp() {
 }
 
 export async function checkAuth() {
-  const token = localStorage.getItem('tf_token');
+  const token = localStorage.getItem('relay_token');
   if (!token) { renderAuth(); return; }
   try {
     const data = await GET('/auth/me');
     setState({ user: data.user });
     enterApp();
   } catch (_) {
-    localStorage.removeItem('tf_token');
+    localStorage.removeItem('relay_token');
     renderAuth();
   }
 }
 
 export function handleLogout() {
-  localStorage.removeItem('tf_token');
+  localStorage.removeItem('relay_token');
   setState({ user: null });
   document.getElementById('app-screen').classList.add('hidden');
   renderAuth();

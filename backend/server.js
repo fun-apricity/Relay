@@ -28,7 +28,7 @@ app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'TaskFlow API is running' });
+  res.json({ status: 'ok', message: 'Relay API is running' });
 });
 
 // 404 handler
@@ -48,7 +48,7 @@ const start = async () => {
   try {
     await initDB();
     app.listen(PORT, () => {
-      console.log(`🚀 TaskFlow server running on port ${PORT}`);
+      console.log(`🚀 Relay server running on port ${PORT}`);
     });
   } catch (err) {
     console.error('Failed to start server:', err);

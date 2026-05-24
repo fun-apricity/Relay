@@ -1,7 +1,7 @@
 const API = 'https://taskflow-production-3dc1.up.railway.app/api';
 
 export async function api(method, path, body = null) {
-  const token = localStorage.getItem('tf_token');
+  const token = localStorage.getItem('relay_token');
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' }

@@ -1,4 +1,10 @@
-# TaskFlow — Deployment Guide
+# Relay — Team Task Manager
+
+> Previously known as TaskFlow
+
+<!-- ═══════════════════════════════════════════════════════ -->
+
+## Deployment Guide
 
 
 ### STEP 1: Install Node.js
@@ -29,7 +35,7 @@
 
 1. Go to **https://github.com** and sign up (free)
 2. Click **New Repository** (green button)
-3. Name it `taskflow`
+3. Name it `relay`
 4. Set it to **Public**
 5. Click **Create repository**
 
@@ -37,14 +43,14 @@
 
 ### STEP 4: Upload Your Code to GitHub
 
-Open your terminal in the `taskflow` folder and run these commands **one by one**:
+Open your terminal in the `relay` folder and run these commands **one by one**:
 
 ```bash
 git init
 git add .
 git commit -m "Initial commit"
 git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/taskflow.git
+git remote add origin https://github.com/YOUR_USERNAME/relay.git
 git push -u origin main
 ```
 
@@ -63,7 +69,7 @@ git push -u origin main
 
 1. On Railway dashboard, click **New Project**
 2. Select **Deploy from GitHub repo**
-3. Choose your `taskflow` repository
+3. Choose your `relay` repository
 4. Railway will detect it — click **Add service**
 5. When it asks for the **root directory**, type: `backend`
 6. Click **Deploy**
@@ -89,7 +95,7 @@ git push -u origin main
 | Variable | Value |
 |---|---|
 | `DATABASE_URL` | (paste the one you copied above) |
-| `JWT_SECRET` | `taskflow_secret_key_2024_xyz` (make this random) |
+| `JWT_SECRET` | `relay_secret_key_2024_xyz` (make this random) |
 | `NODE_ENV` | `production` |
 | `PORT` | `5000` |
 
@@ -102,7 +108,7 @@ git push -u origin main
 1. Click on your backend service
 2. Go to **Settings → Networking**
 3. Click **Generate Domain**
-4. You'll get a URL like: `https://taskflow-backend.up.railway.app`
+4. You'll get a URL like: `https://relay-backend.up.railway.app`
 5. **Copy this URL** — you need it next
 
 ---
@@ -126,7 +132,7 @@ git push -u origin main
 
 Option A — **Deploy on Railway** (recommended):
 1. In Railway, click **+ New → Static Site**
-2. Choose your `taskflow` repo
+2. Choose your `relay` repo
 3. Set root directory to: `frontend`
 4. Set start command to: (leave empty — it's just HTML)
 5. Done! You'll get another URL for the frontend.
