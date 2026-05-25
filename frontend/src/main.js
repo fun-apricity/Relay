@@ -73,7 +73,7 @@ function renderAppShell() {
 
   app.innerHTML = `
     <aside class="sidebar">
-      <div class="sidebar-logo">_task<span>flow</span></div>
+      <div class="sidebar-logo">_<span>relay</span></div>
 
       <div class="sidebar-section">
         <div class="sidebar-section-label nav-text">Menu</div>
