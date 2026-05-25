@@ -21,13 +21,6 @@ const pageRouters = {
 // ─── SIDEBAR SETUP ───
 
 function setupSidebar() {
-  const navMap = {
-    dashboard: { icon: '◈', label: 'Dashboard' },
-    projects: { icon: '⊞', label: 'Projects' },
-    tasks: { icon: '☑', label: 'Tasks' },
-    team: { icon: '◆', label: 'Team' }
-  };
-
   document.querySelectorAll('.nav-item[data-page]').forEach(item => {
     item.addEventListener('click', () => {
       const page = item.dataset.page;
@@ -78,18 +71,18 @@ function renderAppShell() {
       <div class="sidebar-section">
         <div class="sidebar-section-label nav-text">Menu</div>
         <button class="nav-item active" data-page="dashboard">
-          <span class="nav-icon">◈</span><span class="nav-text">Dashboard</span>
+          <span class="nav-text">Dashboard</span>
         </button>
         <button class="nav-item" data-page="projects">
-          <span class="nav-icon">⊞</span><span class="nav-text">Projects</span>
+          <span class="nav-text">Projects</span>
         </button>
         <button class="nav-item" data-page="tasks">
-          <span class="nav-icon">☑</span><span class="nav-text">Tasks</span>
+          <span class="nav-text">Tasks</span>
         </button>
         <div id="admin-nav" class="${isAdmin ? '' : 'hidden'}">
           <div class="sidebar-section-label nav-text">Admin</div>
           <button class="nav-item" data-page="team">
-            <span class="nav-icon">◆</span><span class="nav-text">Team</span>
+            <span class="nav-text">Team</span>
           </button>
         </div>
       </div>
@@ -103,7 +96,7 @@ function renderAppShell() {
           </div>
         </div>
         <button class="nav-item mt-1" onclick="window.handleLogout()" style="color:var(--danger)">
-          <span class="nav-icon">⏻</span><span class="nav-text">Sign Out</span>
+          <span class="nav-text">Sign Out</span>
         </button>
       </div>
     </aside>

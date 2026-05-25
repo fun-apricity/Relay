@@ -24,9 +24,9 @@ export async function renderProjects() {
               <div class="project-name">${escapeHtml(p.name)}</div>
               <div class="project-desc">${escapeHtml(p.description) || 'No description'}</div>
               <div class="project-meta">
-                <span>👤 ${p.owner_name || '—'}</span>
-                <span>👥 ${p.member_count}</span>
-                <span>📋 ${total}</span>
+                <span>${p.owner_name || '—'}</span>
+                <span>${p.member_count} member${p.member_count !== 1 ? 's' : ''}</span>
+                <span>${total} task${total !== 1 ? 's' : ''}</span>
               </div>
               <div class="project-progress">
                 <div class="progress-bar">
@@ -38,7 +38,6 @@ export async function renderProjects() {
           `;
         }).join('')
       : `<div class="empty-state" style="grid-column:1/-1">
-          <div class="empty-icon">📁</div>
           <div class="empty-title">No projects yet</div>
           <div class="empty-desc">${canCreate ? 'Create your first project to get started.' : 'You haven\'t been added to any projects yet.'}</div>
         </div>`;
@@ -139,7 +138,7 @@ export async function renderProjectDetail({ id }) {
             </span>
           </div>
         `).join('')
-      : `<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No tasks yet</div><div class="empty-desc">Add the first task to this project.</div></div>`;
+      : `<div class="empty-state"><div class="empty-title">No tasks yet</div><div class="empty-desc">Add the first task to this project.</div></div>`;
 
     const memberHtml = members.length
       ? members.map(m => `

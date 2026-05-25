@@ -39,7 +39,7 @@ export async function renderTasks() {
             </td>
           </tr>
         `).join('')
-      : `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">✅</div><div class="empty-title">No tasks ${taskFilter !== 'all' ? 'with this status' : 'yet'}</div></div></td></tr>`;
+      : `<tr><td colspan="6"><div class="empty-state"><div class="empty-title">No tasks ${taskFilter !== 'all' ? 'with this status' : 'yet'}</div></div></td></tr>`;
 
     const statuses = ['all', 'todo', 'in_progress', 'review', 'done'];
     const filterBtns = statuses.map(s => `

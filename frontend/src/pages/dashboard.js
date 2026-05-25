@@ -14,43 +14,35 @@ export async function renderDashboard() {
     const statCards = `
       <div class="grid-4" style="margin-bottom:24px">
         <div class="stat-card" style="--accent:var(--primary)">
-          <div class="stat-icon">📋</div>
           <div class="stat-label">Total Tasks</div>
           <div class="stat-value">${t.total}</div>
         </div>
         <div class="stat-card" style="--accent:var(--info)">
-          <div class="stat-icon">⚡</div>
           <div class="stat-label">In Progress</div>
           <div class="stat-value">${t.in_progress}</div>
         </div>
         <div class="stat-card" style="--accent:var(--success)">
-          <div class="stat-icon">✅</div>
           <div class="stat-label">Completed</div>
           <div class="stat-value">${t.done}</div>
         </div>
         <div class="stat-card" style="--accent:var(--danger)">
-          <div class="stat-icon">🔥</div>
           <div class="stat-label">Overdue</div>
           <div class="stat-value">${t.overdue}</div>
         </div>
         ${isAdmin ? `
         <div class="stat-card" style="--accent:#8b5cf6">
-          <div class="stat-icon">👥</div>
           <div class="stat-label">Team</div>
           <div class="stat-value">${userCount}</div>
         </div>
         <div class="stat-card" style="--accent:#f59e0b">
-          <div class="stat-icon">📁</div>
           <div class="stat-label">Projects</div>
           <div class="stat-value">${p.total}</div>
         </div>
         <div class="stat-card" style="--accent:var(--success)">
-          <div class="stat-icon">✅</div>
           <div class="stat-label">Completed</div>
           <div class="stat-value">${p.completed}</div>
         </div>
         <div class="stat-card" style="--accent:var(--info)">
-          <div class="stat-icon">🔄</div>
           <div class="stat-label">Active</div>
           <div class="stat-value">${p.active}</div>
         </div>
@@ -85,7 +77,7 @@ export async function renderDashboard() {
             `).join('')}
           </tbody>
         </table>`
-      : `<div class="empty-state" style="padding:32px"><div class="empty-icon">🎉</div><div class="empty-title">No overdue tasks</div></div>`;
+      : `<div class="empty-state" style="padding:32px"><div class="empty-title">No overdue tasks</div></div>`;
 
     setContent(`
       <div class="page-header">
@@ -101,7 +93,7 @@ export async function renderDashboard() {
           ${recentHtml}
         </div>
         <div class="card">
-          <div class="card-title">⚠️ Overdue</div>
+          <div class="card-title">Overdue</div>
           ${overdueHtml}
         </div>
       </div>
